@@ -21,6 +21,15 @@ class Square(object):
 		else:
 			return '{:^10}'.format(self.name)
 
+	def get_name(self):
+		return self.piece.name or self.name
+
+	def get_owner(self):
+		if self.piece:
+			return self.piece.owner
+		else:
+			return False
+
 	def update(self, piece):
 		self.piece = piece
 
@@ -85,8 +94,8 @@ class Piece(object):
 					return True
 		else:
 			return False
-		if all(self.owner == player, location in self.moves):
-
+		# if all(self.owner == player, location in self.moves):
+		# pass
 
 
 
@@ -185,22 +194,38 @@ class Board(object):
 
 		return [square.update(pieces[i]) for i, square in enumerate(row)]
 
-	def __validate_piece(self, piece_name):
+	def __validate_piece(self, piece_name, player):
+
 		for row in self.board:
 			for square in row:
-				if square.piece.name == piece_name:
+				if (square.get_name(), square.get_owner()) == (piece_name, player):
+					return square.piece					
+		else:
+			return False
+
+	def __validate_location(self, location, player):
+
+		for row in self.board:
+			for square in row:
+				if all(square.get_name() == location, square.get_owner() != player):
 					return square
 		else:
-			return None
+			return False
+
 
 	def move_piece(self, player, piece_name, location):
 
-
-		piece =  self.__validate_piece(piece_name)
-		if not piece:
+		valid_piece =  self.__validate_piece(piece_name, player)
+		if not valid_piece:
 			return 'Please select a valid piece.'
 		
-		if piece.valid_move(player, location):
-			piece.move(location)
+		valid_square = self.__validate_location(location, player)
+		if not valid_square:
+			return 'Please select a valid location.'
+
+
+
+		# if piece.valid_move(player, location):
+		# 	piece.move(location)
 
 
