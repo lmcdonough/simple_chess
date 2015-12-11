@@ -49,7 +49,7 @@ class Piece(object):
 	def __init__(self, name=None, owner=None, moves = None):
 		self.name = name
 		self.owner = owner
-		self.moves = moves or {}
+		self.moves = moves or []
 
 	def __str__(self):
 		return '{}'.format(self.name)
@@ -80,6 +80,12 @@ class Piece(object):
 			# else:
 				# if self.owner == 
 
+	def get_moves(self):
+		pass
+
+	def set_moves(self):
+		pass
+		
 	def get_location(self, board):
 		
 		for row in board:
@@ -163,6 +169,7 @@ class Board(object):
 
 	def reset_board(self):
 		
+		# below for loop might not be necessary since piece defaults to None.
 		for row in self.board:
 			for square in row:
 				square.piece = None
@@ -177,19 +184,19 @@ class Board(object):
 
 	def __set_pawns(self, row, player):
 	
-		return [square.update(Pawn('{}{}{}'.format('PAWN', player.name[0].upper(), i), player)) for i, square in enumerate(row)]
+		return [square.update(Pawn('{}{}{}'.format('PAWN', player.name[0].upper(), i), player).set_moves()) for i, square in enumerate(row)]
 
 	def __set_other_pieces(self, row, player):		
 
 		pieces = 	 [
-				Rook('{}{}{}'.format('ROOK', player.name[0].upper(), 0), player),
-				Knight('{}{}{}'.format('KNIGHT', player.name[0].upper(), 0), player),
-				Bishop('{}{}{}'.format('BISHOP', player.name[0].upper(), 0), player),
-				Queen('{}{}'.format('QUEEN', player.name[0].upper()), player),
-				King('{}{}'.format('KING', player.name[0].upper()), player),
-				Bishop('{}{}{}'.format('BISHOP', player.name[0].upper(), 1), player),
-				Knight('{}{}{}'.format('KNIGHT', player.name[0].upper(), 1), player),
-				Rook('{}{}{}'.format('ROOK', player.name[0].upper(), 1), player),
+				Rook('{}{}{}'.format('ROOK', player.name[0].upper(), 0), player).set_moves(),
+				Knight('{}{}{}'.format('KNIGHT', player.name[0].upper(), 0), player).set_moves(),
+				Bishop('{}{}{}'.format('BISHOP', player.name[0].upper(), 0), player).set_moves(),
+				Queen('{}{}'.format('QUEEN', player.name[0].upper()), player).set_moves(),
+				King('{}{}'.format('KING', player.name[0].upper()), player).set_moves(),
+				Bishop('{}{}{}'.format('BISHOP', player.name[0].upper(), 1), player).set_moves(),
+				Knight('{}{}{}'.format('KNIGHT', player.name[0].upper(), 1), player).set_moves(),
+				Rook('{}{}{}'.format('ROOK', player.name[0].upper(), 1), player).set_moves(),
 				]
 
 		return [square.update(pieces[i]) for i, square in enumerate(row)]
@@ -199,33 +206,36 @@ class Board(object):
 		for row in self.board:
 			for square in row:
 				if (square.get_name(), square.get_owner()) == (piece_name, player):
-					return square.piece					
+					return square					
 		else:
 			return False
 
-	def __validate_location(self, location, player):
+	def __validate_location(self, location, player, valid_piece):
 
 		for row in self.board:
 			for square in row:
-				if all(square.get_name() == location, square.get_owner() != player):
+				if all(square.get_name() == location, square.get_owner() != player, square in valid_piece.piece.get_moves()):
 					return square
 		else:
 			return False
 
 
-	def move_piece(self, player, piece_name, location):
+	def __move(self, valid_piece, valid_location):
+		pass
+
+
+	def validate(self, player, piece_name, location):
 
 		valid_piece =  self.__validate_piece(piece_name, player)
 		if not valid_piece:
 			return 'Please select a valid piece.'
 		
-		valid_square = self.__validate_location(location, player)
-		if not valid_square:
+		valid_location = self.__validate_location(location, player, valid_piece)
+		if not valid_location:
 			return 'Please select a valid location.'
 
+		self.__move(valid_piece, valid_location)
 
 
-		# if piece.valid_move(player, location):
-		# 	piece.move(location)
 
 
