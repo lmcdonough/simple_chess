@@ -78,6 +78,15 @@ class Piece(object):
 				if square.piece == self:
 					return square
 
+	def move(self, player, location, board):
+		for row in board:
+			for square in row:
+				if square.piece.name == self.name:
+					return True
+		else:
+			return False
+		if all(self.owner == player, location in self.moves):
+
 
 
 
@@ -85,10 +94,6 @@ class Pawn(Piece):
 
 	def __init__(self, name, owner, moves=None):
 		super(Pawn, self).__init__(name=name, owner=owner, moves=moves)
-
-
-	def move(self, location):
-		pass
 
 
 class King(Piece):
@@ -180,10 +185,22 @@ class Board(object):
 
 		return [square.update(pieces[i]) for i, square in enumerate(row)]
 
-	
-	def move_piece(self, player, piece, location):
-		
-		pass
+	def __validate_piece(self, piece_name):
+		for row in self.board:
+			for square in row:
+				if square.piece.name == piece_name:
+					return square
+		else:
+			return None
 
+	def move_piece(self, player, piece_name, location):
+
+
+		piece =  self.__validate_piece(piece_name)
+		if not piece:
+			return 'Please select a valid piece.'
+		
+		if piece.valid_move(player, location):
+			piece.move(location)
 
 
