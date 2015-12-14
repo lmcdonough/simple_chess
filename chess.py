@@ -1,6 +1,19 @@
 #!/usr/bin/python
 
 import string
+import operator as op
+from __future__ import print_function
+
+ALPHABET = string.lowercase[:8]
+OPERATOR_MAP  = {'black':op.add, 'white': op.sub}
+PLAYERS = {'PLAYER_1': None, 'PLAYER_2': None}
+
+# TODO Make Board use class instead of instance. Change getter and setter
+# methods to actual properties where possible. 
+# create moves config
+# write check board state method to dteermine if game is over. 
+# create if name equals main, with sys.close(). In order to use
+# raw_input to start the game. 
 
 '''A simple interface for a chess application.'''
 
@@ -8,7 +21,8 @@ import string
 
 class Square(object):
 
-	def __init__(self, name, piece = None):
+	def __init__(self, name, square_id, piece = None):
+		self.square_id = square_id
 		self.name = name
 		self.piece = piece
 	
@@ -35,8 +49,9 @@ class Square(object):
 
 class Player(object):
 	
-	def __init__(self, name=None):
+	def __init__(self, name, color):
 		self.name = name
+		self.color = color
 
 	def __str__(self):
 		return '{}'.format(self.name)
@@ -46,10 +61,13 @@ class Player(object):
 
 class Piece(object):
 
-	def __init__(self, name=None, owner=None, moves = None):
+	def __init__(self, name=None, owner=None, location=None, moves = None):
 		self.name = name
 		self.owner = owner
-		self.moves = moves or []
+		self.location = location
+		self.moves = moves or {}
+		self.set_moves()
+
 
 	def __str__(self):
 		return '{}'.format(self.name)
@@ -58,34 +76,26 @@ class Piece(object):
 	# 	# return 'Piece({},{},{})'.format(self.name, self.owner, self.moves)
 		return '{}'.format(self.name)
 
-	def move(self, square):
-		pass
-		# validate square to move to 
-		# check if it's a square reachable by 
-		# this piece, that it's an acceptable square.
-		# check the state of the square, meaning
-		# meaning if there is an existing piece there already
-		# and what kind of piece is there. 
-		# check who the owner of the piece is.
-		# if not reachable:
-			# return '{square} is not a valid move'.format(square)
-		# if not square.piece:
-			# square.piece = self.return_self()
-			# self.square.piece = None
-			# self.square = square
-			# Board.check_state()
-		# else:
-			# if not square.piece.owner == self.owner
-				# self.location = location
-			# else:
-				# if self.owner == 
-
 	def get_moves(self):
 		pass
 
+	def validate_move(self, x, y):
+		# TODO figure out string index wrap around issue.
+		try:
+			move = '{}{}'.format(ALPHABET[self.location[0]+x], OPERATOR_MAP[self.owner.color](self.location[1], y))
+			if move in Board.squares:
+				return move
+			else:
+				return False
+		except IndexError:
+			return False
+
+
 	def set_moves(self):
-		pass
-		
+
+		self.moves['regular'] = [self.validate_move(0, 1),]
+		# self.moves['attack'] = [self.validate_move(1, 1), self.validate_move(-1, 1)]
+
 	def get_location(self, board):
 		
 		for row in board:
@@ -93,56 +103,57 @@ class Piece(object):
 				if square.piece == self:
 					return square
 
-	def move(self, player, location, board):
-		for row in board:
-			for square in row:
-				if square.piece.name == self.name:
-					return True
-		else:
-			return False
-		# if all(self.owner == player, location in self.moves):
-		# pass
-
-
 
 class Pawn(Piece):
 
-	def __init__(self, name, owner, moves=None):
-		super(Pawn, self).__init__(name=name, owner=owner, moves=moves)
+	def __init__(self, name, owner, location, moves=None, initial=True):		
+		self.initial = initial
+		super(Pawn, self).__init__(name=name, owner=owner, location=location, moves=moves)
+
+
+	def set_moves(self):
+
+		self.moves['regular'] = [self.validate_move(0, 1),]
+		if self.initial:
+			self.moves['regular'].append(self.validate_move(0, 2))
+			self.initial = False
+		self.moves['attack'] = [self.validate_move(1, 1), self.validate_move(-1, 1)]
 
 
 class King(Piece):
 
-	def __init__(self, name, owner, moves=None):
-		super(King, self).__init__(name=name, owner=owner, moves=moves)
+	def __init__(self, name, owner, location, moves=None):
+		super(King, self).__init__(name=name, owner=owner, location=location, moves=moves)
 
 
 class Queen(Piece):
 
-	def __init__(self, name, owner, moves=None):
-		super(Queen, self).__init__(name=name, owner=owner, moves=moves)
+	def __init__(self, name, owner, location, moves=None):
+		super(Queen, self).__init__(name=name, owner=owner, location=location, moves=moves)
 
 
 class Rook(Piece):
 
-	def __init__(self, name, owner, moves=None):
-		super(Rook, self).__init__(name=name, owner=owner, moves=moves)
+	def __init__(self, name, owner, location, moves=None):
+		super(Rook, self).__init__(name=name, owner=owner, location=location, moves=moves)
 
 
 class Bishop(Piece):
 
-	def __init__(self, name, owner, moves=None):
-		super(Bishop, self).__init__(name=name, owner=owner, moves=moves)
+	def __init__(self, name, owner, location, moves=None):
+		super(Bishop, self).__init__(name=name, owner=owner, location=location, moves=moves)
 
 
 class Knight(Piece):
 
-	def __init__(self, name, owner, moves=None):
-		super(Knight, self).__init__(name=name, owner=owner, moves=moves)
+	def __init__(self, name, owner, location, moves=None):
+		super(Knight, self).__init__(name=name, owner=owner, location=location, moves=moves)
 
 
 
 class Board(object):
+
+	squares = []
 
 	def __init__(self):
 		'''create a chess board with pieces positioned for a new game
@@ -156,8 +167,9 @@ class Board(object):
 
 		for i in range(8, 0, -1):
 			row = []
-			for l in string.lowercase[:8]:
-				row.append(Square(name='square{}{}'.format(l, i)))
+			for index, letter in enumerate(ALPHABET):
+				row.append(Square(square_id=(index, i), name='square{}{}'.format(letter, i)))
+				Board.squares.append('{}{}'.format(letter, i))
 			self.board.append(row)
 		
         
@@ -169,34 +181,33 @@ class Board(object):
 
 	def reset_board(self):
 		
-		# below for loop might not be necessary since piece defaults to None.
 		for row in self.board:
 			for square in row:
 				square.piece = None
 
-		player_1 = Player('Levi')
-		player_2 = Player('Fernanda')
-		self.__set_pawns(self.board[1], player_1)
-		self.__set_pawns(self.board[6], player_2)
-		self.__set_other_pieces(self.board[0], player_1)
-		self.__set_other_pieces(self.board[7], player_2)
+		PLAYERS['PLAYER_1'] = Player('Levi', 'white')
+		PLAYERS['PLAYER_2'] = Player('Fernanda', 'black')
+		self.__set_pawns(self.board[1], PLAYERS['PLAYER_1'], 7)
+		self.__set_pawns(self.board[6], PLAYERS['PLAYER_2'], 2)
+		self.__set_other_pieces(self.board[0], PLAYERS['PLAYER_1'], 8)
+		self.__set_other_pieces(self.board[7], PLAYERS['PLAYER_2'], 1)
 
 
-	def __set_pawns(self, row, player):
+	def __set_pawns(self, row, player, row_num):
 	
-		return [square.update(Pawn('{}{}{}'.format('PAWN', player.name[0].upper(), i), player).set_moves()) for i, square in enumerate(row)]
+		return [square.update(Pawn('{}{}{}'.format('PAWN', player.name[0].upper(), i), player, (i, row_num))) for i, square in enumerate(row)]
 
-	def __set_other_pieces(self, row, player):		
+	def __set_other_pieces(self, row, player, row_num):		
 
 		pieces = 	 [
-				Rook('{}{}{}'.format('ROOK', player.name[0].upper(), 0), player).set_moves(),
-				Knight('{}{}{}'.format('KNIGHT', player.name[0].upper(), 0), player).set_moves(),
-				Bishop('{}{}{}'.format('BISHOP', player.name[0].upper(), 0), player).set_moves(),
-				Queen('{}{}'.format('QUEEN', player.name[0].upper()), player).set_moves(),
-				King('{}{}'.format('KING', player.name[0].upper()), player).set_moves(),
-				Bishop('{}{}{}'.format('BISHOP', player.name[0].upper(), 1), player).set_moves(),
-				Knight('{}{}{}'.format('KNIGHT', player.name[0].upper(), 1), player).set_moves(),
-				Rook('{}{}{}'.format('ROOK', player.name[0].upper(), 1), player).set_moves(),
+				Rook('{}{}{}'.format('ROOK', player.name[0].upper(), 0), player, (0, row_num)),
+				Knight('{}{}{}'.format('KNIGHT', player.name[0].upper(), 0), player, (1, row_num)),
+				Bishop('{}{}{}'.format('BISHOP', player.name[0].upper(), 0), player, (2, row_num)),
+				Queen('{}{}'.format('QUEEN', player.name[0].upper()), player, (3, row_num)),
+				King('{}{}'.format('KING', player.name[0].upper()), player, (4, row_num)),
+				Bishop('{}{}{}'.format('BISHOP', player.name[0].upper(), 1), player, (5, row_num)),
+				Knight('{}{}{}'.format('KNIGHT', player.name[0].upper(), 1), player, (6, row_num)),
+				Rook('{}{}{}'.format('ROOK', player.name[0].upper(), 1), player, (7, row_num)),
 				]
 
 		return [square.update(pieces[i]) for i, square in enumerate(row)]
@@ -214,28 +225,43 @@ class Board(object):
 
 		for row in self.board:
 			for square in row:
-				if all(square.get_name() == location, square.get_owner() != player, square in valid_piece.piece.get_moves()):
+				if all([square.get_name() == location, square.get_owner() != player, square in valid_piece.piece.get_moves()]):
 					return square
 		else:
 			return False
 
-
-	def __move(self, valid_piece, valid_location):
-		pass
-
-
-	def validate(self, player, piece_name, location):
-
+	def __validate(self, player, piece_name, location):
+		
+		context = {}
 		valid_piece =  self.__validate_piece(piece_name, player)
 		if not valid_piece:
-			return 'Please select a valid piece.'
+			context['message'] = 'Please select a valid piece.'
+			return context
 		
 		valid_location = self.__validate_location(location, player, valid_piece)
 		if not valid_location:
-			return 'Please select a valid location.'
+			context['message'] = 'Please select a valid location.'
+			return context
 
-		self.__move(valid_piece, valid_location)
+		context['validated_piece'] = valid_piece
+		context['validated_location'] = valid_location
+		return context
+		
+	def move(self, player, piece_name, location):
+		
+		validated_vals =  self.__validate(player, piece_name, location)
+		if 'message' in validated_vals:
+			return validated_vals['message']
+		else:
+			print('\n\nMoved {} to {}.\n\n'.format(validated_vals['validated_piece'].piece, validated_vals['validated_location']))
+			validated_vals['validated_location'].piece = validated_vals['validated_piece'].piece
+			validated_vals['validated_location'].piece.set_moves()
+			validated_vals['validated_piece'].piece = None
+			return self.__check_state() or '\n\n\n{}\n\n\n'.format(self.board) 
 
 
+	def __check_state(self):
+		# return message if it's game over, otherwise return False.
+		pass
 
 
