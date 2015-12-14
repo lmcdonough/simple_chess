@@ -1,11 +1,12 @@
 #!/usr/bin/python
 
+from __future__ import print_function
 import string
 import operator as op
-from __future__ import print_function
+
 
 ALPHABET = string.lowercase[:8]
-OPERATOR_MAP  = {'black':op.add, 'white': op.sub}
+OPERATOR_MAP  = {'black':op.sub, 'white': op.add}
 PLAYERS = {'PLAYER_1': None, 'PLAYER_2': None}
 
 # TODO Make Board use class instead of instance. Change getter and setter
@@ -80,14 +81,12 @@ class Piece(object):
 		pass
 
 	def validate_move(self, x, y):
-		# TODO figure out string index wrap around issue.
-		try:
-			move = '{}{}'.format(ALPHABET[self.location[0]+x], OPERATOR_MAP[self.owner.color](self.location[1], y))
-			if move in Board.squares:
-				return move
-			else:
-				return False
-		except IndexError:
+
+		move = (self.location[0]+x, OPERATOR_MAP[self.owner.color](self.location[1], y))
+		# move = '{}{}'.format(ALPHABET[self.location[0]+x], OPERATOR_MAP[self.owner.color](self.location[1], y))
+		if move in Board.squares:
+			return move
+		else:
 			return False
 
 
@@ -169,7 +168,7 @@ class Board(object):
 			row = []
 			for index, letter in enumerate(ALPHABET):
 				row.append(Square(square_id=(index, i), name='square{}{}'.format(letter, i)))
-				Board.squares.append('{}{}'.format(letter, i))
+				Board.squares.append((index, i))
 			self.board.append(row)
 		
         
@@ -185,8 +184,8 @@ class Board(object):
 			for square in row:
 				square.piece = None
 
-		PLAYERS['PLAYER_1'] = Player('Levi', 'white')
-		PLAYERS['PLAYER_2'] = Player('Fernanda', 'black')
+		PLAYERS['PLAYER_1'] = Player('Levi', 'black')
+		PLAYERS['PLAYER_2'] = Player('Fernanda', 'white')
 		self.__set_pawns(self.board[1], PLAYERS['PLAYER_1'], 7)
 		self.__set_pawns(self.board[6], PLAYERS['PLAYER_2'], 2)
 		self.__set_other_pieces(self.board[0], PLAYERS['PLAYER_1'], 8)
