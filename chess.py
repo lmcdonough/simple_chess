@@ -12,7 +12,7 @@ PLAYERS = {'PLAYER_1': None, 'PLAYER_2': None}
 # TODO Make Board use class instead of instance. Change getter and setter
 # methods to actual properties where possible. 
 # create moves config
-# write check board state method to dteermine if game is over. 
+# write check board state method to determine if game is over. 
 # create if name equals main, with sys.close(). In order to use
 # raw_input to start the game. 
 
@@ -37,7 +37,10 @@ class Square(object):
 			return '{:^10}'.format(self.name)
 
 	def get_name(self):
-		return self.piece.name or self.name
+		if self.piece:
+			return self.piece.name
+		else:
+			return self.name
 
 	def get_owner(self):
 		if self.piece:
@@ -73,17 +76,18 @@ class Piece(object):
 	def __str__(self):
 		return '{}'.format(self.name)
 
-	def __repr__(self):
-	# 	# return 'Piece({},{},{})'.format(self.name, self.owner, self.moves)
+	def __repr__(self):	
 		return '{}'.format(self.name)
 
-	def get_moves(self):
-		pass
+	def get_moves(self, attack):
+		if attack:
+			return self.moves['attack']
+		else:
+			return self.moves['regular']
 
 	def validate_move(self, x, y):
 
-		move = (self.location[0]+x, OPERATOR_MAP[self.owner.color](self.location[1], y))
-		# move = '{}{}'.format(ALPHABET[self.location[0]+x], OPERATOR_MAP[self.owner.color](self.location[1], y))
+		move = (self.location[0]+x, OPERATOR_MAP[self.owner.color](self.location[1], y))		
 		if move in Board.squares:
 			return move
 		else:
@@ -93,14 +97,6 @@ class Piece(object):
 	def set_moves(self):
 
 		self.moves['regular'] = [self.validate_move(0, 1),]
-		# self.moves['attack'] = [self.validate_move(1, 1), self.validate_move(-1, 1)]
-
-	def get_location(self, board):
-		
-		for row in board:
-			for square in row:
-				if square.piece == self:
-					return square
 
 
 class Pawn(Piece):
@@ -224,7 +220,7 @@ class Board(object):
 
 		for row in self.board:
 			for square in row:
-				if all([square.get_name() == location, square.get_owner() != player, square in valid_piece.piece.get_moves()]):
+				if all([square.get_name() == location, square.get_owner() != player, square.square_id in valid_piece.piece.get_moves(square.get_owner())]):
 					return square
 		else:
 			return False
@@ -234,12 +230,12 @@ class Board(object):
 		context = {}
 		valid_piece =  self.__validate_piece(piece_name, player)
 		if not valid_piece:
-			context['message'] = 'Please select a valid piece.'
+			context['message'] = '\nPlease select a valid piece.\n'
 			return context
 		
 		valid_location = self.__validate_location(location, player, valid_piece)
 		if not valid_location:
-			context['message'] = 'Please select a valid location.'
+			context['message'] = '\nPlease select a valid location.\n'
 			return context
 
 		context['validated_piece'] = valid_piece
@@ -250,17 +246,18 @@ class Board(object):
 		
 		validated_vals =  self.__validate(player, piece_name, location)
 		if 'message' in validated_vals:
-			return validated_vals['message']
+			print(validated_vals['message'])
 		else:
-			print('\n\nMoved {} to {}.\n\n'.format(validated_vals['validated_piece'].piece, validated_vals['validated_location']))
+			print('\nMoved {} to {}.\n'.format(validated_vals['validated_piece'].piece, validated_vals['validated_location']))
 			validated_vals['validated_location'].piece = validated_vals['validated_piece'].piece
+			validated_vals['validated_location'].piece.location = validated_vals['validated_location'].square_id
 			validated_vals['validated_location'].piece.set_moves()
 			validated_vals['validated_piece'].piece = None
-			return self.__check_state() or '\n\n\n{}\n\n\n'.format(self.board) 
+			return self.__check_state() or print(self)
 
 
 	def __check_state(self):
 		# return message if it's game over, otherwise return False.
-		pass
+		return False
 
 
