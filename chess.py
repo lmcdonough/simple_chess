@@ -24,24 +24,19 @@ PIECE_MOVES = {
 					'Initial': [(0, 2)]
 				},
 				'Rook': {
-					'Regular': [],
-					'Attack': []
+					'Regular': []
 				},
 				'Knight': {
-					'Regular': [],
-					'Attack': []
+					'Regular': []
 				},
 				'Bishop': {
-					'Regular': [],
-					'Attack': []
+					'Regular': []
 				},
 				'Queen': {
-					'Regular': [],
-					'Attack': []
+					'Regular': []
 				},
 				'King': {
-					'Regular': [],
-					'Attack': []
+					'Regular': []
 				}
 			}
 
@@ -108,8 +103,8 @@ class Piece(object):
 			self.initial = False
 			if PIECE_MOVES[self.piece_type].get('Initial', False):
 				self.moves['regular'].extend([self.validate_move(x, y) for x, y in PIECE_MOVES[self.piece_type].get('Initial')])
-		if PIECE_MOVES[self.piece_type].get('Attack', None):
-			self.moves['attack'] = [self.validate_move(x, y) for x, y in PIECE_MOVES.get('Attack')]
+		if PIECE_MOVES[self.piece_type].get('Attack', False):			
+			self.moves['attack'] = [self.validate_move(x, y) for x, y in PIECE_MOVES[self.piece_type].get('Attack')]
 
 
 class Pawn(Piece):
