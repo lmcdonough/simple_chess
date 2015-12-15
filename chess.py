@@ -146,7 +146,7 @@ class Board(object):
 
 	@classmethod
 	def display_board(cls):
-		print(cls())
+		print('\n{}\n'.format(cls()))
 
 	@classmethod
 	def reset_board(cls):
@@ -154,7 +154,7 @@ class Board(object):
 		for i in range(8, 0, -1):
 			row = []
 			for index, letter in enumerate(ALPHABET):
-				row.append(Square(square_id=(index, i), name='square{}{}'.format(letter, i)))
+				row.append(Square(square_id=(index, i), name='square{}{}'.format(letter.upper(), i)))
 				cls.squares.append((index, i))
 			cls.contents.append(row)
 
@@ -172,20 +172,20 @@ class Board(object):
 	@classmethod
 	def __set_pawns(cls, row, player, row_num):
 	
-		return [square.update(Pawn('{}{}{}'.format('PAWN', player.name[0].upper(), i), player, (i, row_num))) for i, square in enumerate(row)]
+		return [square.update(Pawn('{}{}{}'.format('pawn', player.name[0].upper(), i), player, (i, row_num))) for i, square in enumerate(row)]
 
 	@classmethod
 	def __set_other_pieces(cls, row, player, row_num):		
 
 		pieces = 	 [
-				Rook('{}{}{}'.format('ROOK', player.name[0].upper(), 0), player, (0, row_num)),
-				Knight('{}{}{}'.format('KNIGHT', player.name[0].upper(), 0), player, (1, row_num)),
-				Bishop('{}{}{}'.format('BISHOP', player.name[0].upper(), 0), player, (2, row_num)),
-				Queen('{}{}'.format('QUEEN', player.name[0].upper()), player, (3, row_num)),
-				King('{}{}'.format('KING', player.name[0].upper()), player, (4, row_num)),
-				Bishop('{}{}{}'.format('BISHOP', player.name[0].upper(), 1), player, (5, row_num)),
-				Knight('{}{}{}'.format('KNIGHT', player.name[0].upper(), 1), player, (6, row_num)),
-				Rook('{}{}{}'.format('ROOK', player.name[0].upper(), 1), player, (7, row_num)),
+				Rook('{}{}{}'.format('rook', player.name[0].upper(), 0), player, (0, row_num)),
+				Knight('{}{}{}'.format('knight', player.name[0].upper(), 0), player, (1, row_num)),
+				Bishop('{}{}{}'.format('bishop', player.name[0].upper(), 0), player, (2, row_num)),
+				Queen('{}{}'.format('queen', player.name[0].upper()), player, (3, row_num)),
+				King('{}{}'.format('king', player.name[0].upper()), player, (4, row_num)),
+				Bishop('{}{}{}'.format('bishop', player.name[0].upper(), 1), player, (5, row_num)),
+				Knight('{}{}{}'.format('knight', player.name[0].upper(), 1), player, (6, row_num)),
+				Rook('{}{}{}'.format('rook', player.name[0].upper(), 1), player, (7, row_num)),
 				]
 
 		return [square.update(pieces[i]) for i, square in enumerate(row)]
@@ -235,7 +235,7 @@ class Board(object):
 		if 'message' in validated_vals:
 			print(validated_vals['message'])
 		else:
-			print('\nMoved {} to {}.\n'.format(validated_vals['validated_piece'].piece, validated_vals['validated_location']))
+			print('\nMoved {} to {}.\n'.format(validated_vals['validated_piece'].piece.name, validated_vals['validated_location'].name))
 			validated_vals['validated_location'].piece = validated_vals['validated_piece'].piece
 			validated_vals['validated_location'].piece.location = validated_vals['validated_location'].square_id
 			validated_vals['validated_location'].piece.set_moves()
@@ -248,8 +248,8 @@ class Board(object):
 
 		cls.display_board()
 		player = cls.turn
-		piece = raw_input('{}, Enter the name of the piece you want to move.'.format(cls.turn))
-		location = raw_input('Now enter then name of the location or piece you want to move it to.')
+		piece = raw_input('\n{}, enter the name of the piece you want to move: '.format(cls.turn))
+		location = raw_input('\nNow enter then name of the location or piece you want to move it to: ')
 		cls.__toggle_player(player)
 		cls.__move(player, piece, location)
 
@@ -263,8 +263,8 @@ class Board(object):
 
 
 def main():
-	player_1 = raw_input('Player 1, enter your name.')
-	player_2 = raw_input('Player 2, enter your name.')
+	player_1 = raw_input('\nPlayer 1, enter your name: ')
+	player_2 = raw_input('\nPlayer 2, enter your name: ')
 
 	PLAYERS['PLAYER_1'] = Player(player_1, 'black')
 	PLAYERS['PLAYER_2'] = Player(player_2, 'white')
