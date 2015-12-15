@@ -166,12 +166,7 @@ class Board(object):
 	square_ids = []
 	contents = []
 	turn = None
-	state = {
-			'check': False,
-			'checkmate': False,
-			'draw': False,
-			'result_message': None
-	}
+	result_message = None
 
 	def __str__(self):
 		return '\n'.join(str(square) for square in self.contents)	
@@ -290,17 +285,12 @@ class Board(object):
 	@classmethod
 	def __check_state(cls):
 
-		cls.__is_checkmate()
-		cls.__is_draw()
-		cls.__is_check()
-
-		if any(Board.state.get('checkmate'), Board.state.get('draw')):
-			print('{}'.format(Board.state.get('result_message')))
+		if any(cls.__is_checkmate(), cls.__is_draw()):
+			print('{}'.format(cls.result_message))
 		else:
-			if Board.state.get('check'):
-				print('{}'.format(Board.state.get('result_message')))
-				Board.state['check'] = False
-				Board.state['result_message'] = None
+			if cls.__is_check():
+				print('{}'.format(cls.result_message))
+				cls.result_message = None
 			cls.display_board()
 			piece, location = cls.__prompt_player()
 			cls.__move(cls.turn, piece, location)
