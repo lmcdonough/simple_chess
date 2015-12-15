@@ -347,7 +347,7 @@ class Board(object):
 		'''Checks the state of the Board to determine if one of the criteria 
 		is met for the game to be over. Or prompts the next Player to move.'''
 
-		if any(cls.__is_checkmate(), cls.__is_draw()):
+		if any([cls.__is_checkmate(), cls.__is_draw()]):
 			print('{}'.format(cls.result_message))
 		else:
 			if cls.__is_check():
