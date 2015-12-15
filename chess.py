@@ -10,7 +10,9 @@ give you an idea as to how I would complete the rest of the program. You can how
 run the program and move the pawns, there is clearly much left to do to complete the program
 but for the sake of time I figured this would be enough.'''
 
-'''To move a and named PawnL1 to location squareA5 you would type both of 
+'''Pieces use the first initial of your name to identify their owners. 
+For example, if your name is Tom, your Pawn would be named PawnT0 and so on.
+To move a Piece named PawnT1 to location squareA5 you would type both of 
 those names into the console when prompted.'''
 
 
@@ -339,7 +341,7 @@ class Board(object):
 		the location they would like to move it to.'''
 
 		piece = raw_input('\n{}, enter the name of the piece you want to move: '.format(cls.turn))
-		location = raw_input('\nNow enter then name of the location or piece you want to move it to: ')
+		location = raw_input('\nEnter the name of the location or piece you want to move it to: ')
 		return piece, location
 
 	@classmethod
